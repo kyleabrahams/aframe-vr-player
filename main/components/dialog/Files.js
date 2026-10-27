@@ -185,8 +185,6 @@ AFRAME.registerComponent(C_FILES, {
                                     });
 
                                     // GLOBAL PRODUCTION LOCKS: 
-                                    // Bypasses minified framework channels to push the metadata parameters instantly 
-                                    // onto your floating 3D text title containers and global timeline modules!
                                     window.globalCurrentFileName = matchedFile.name;
                                     
                                     const textDisplay = document.getElementById('vrVideoTitle');
@@ -220,17 +218,13 @@ AFRAME.registerComponent(C_FILES, {
                             // A-FRAME SPECIFIC TEXTURE RE-BINDING & THREE.JS BUFFER CLEAR:
                             const envEl = document.getElementById('env') || document.querySelector('a-videosphere') || document.querySelector('[material*="src: #video"]')
                             if (envEl && envEl.object3D) {
-                                // Clear old material settings to avoid texture mapping lockups
                                 envEl.removeAttribute('material')
-                                
-                                // Re-inject the pristine A-Frame material component pointing to the active resource node
                                 envEl.setAttribute('material', {
                                     src: '#video',
                                     shader: 'flat',
                                     side: 'back'
                                 })
 
-                                // Force Three.js mesh surfaces to invalidate cache and bind onto the new frame stream
                                 envEl.object3D.traverse((node) => {
                                     if (node.material && node.material.map) {
                                         node.material.map.needsUpdate = true;
@@ -243,7 +237,6 @@ AFRAME.registerComponent(C_FILES, {
                         }
                     }
 
-                    // Reset sub assets registry track index context reference
                     if (El.subtitles && typeof El.subtitles.removeAttribute === 'function') {
                         El.subtitles.removeAttribute('subtitles');
                     }
@@ -263,24 +256,15 @@ AFRAME.registerComponent(C_FILES, {
                     "position": `-${DWidth * 0.2} ${pos} 1`,
                     "clickable": "",
                     "button-highlight": "",
-                    // 1. We removed 'marq-text' completely to prevent silent render failures
-                    // 2. We use A-Frame's native text layer, forcing it to automatically fit the button
                     "text": `value: ${sub ? "[sub] " : ""}${getFileName(this.files[i])}; align: center; width: 4; wrapCount: 35; zOffset: 0.05`
                 }, [], el)
                 
                 tile.onclick = async () => {
                     try {
-                        // Retrieve the nested directory handle object directly from your disk
                         const subDirectoryHandle = await window.localFolderHandle.getDirectoryHandle(folderName);
-                        
-                        // Swap out our global folder tracking pointer to point at the new subfolder
                         window.localFolderHandle = subDirectoryHandle;
-                        
-                        // Force the component to clear the cache and re-index the new subfolder contents
                         let nextUrl = url ? (url + "/" + folderName) : folderName;
                         el.setAttribute(C_FILES, { 'url': nextUrl });
-                        
-                        console.log("Navigating deep into subfolder handle: ", nextUrl);
                     } catch (err) {
                         console.error("Failed to access nested disk directory:", err);
                     }
