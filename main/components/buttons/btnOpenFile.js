@@ -20,11 +20,36 @@ AFRAME.registerComponent('btn-open-file', {
             nativeFileInput.click();
         });
 
-        // 2. Prevent event stacking leak loops
+        // 2. Core Broadcast Engine: Updates text panels and timeline track bars directly
+        this.syncPlayerInterfaceElements = (fileName) => {
+            // A. Update Floating 3D Title Header Overlay Node
+            const textDisplay = document.getElementById('vrVideoTitle');
+            if (textDisplay) {
+                textDisplay.setAttribute('value', fileName || "Streaming Local File");
+            }
+
+            // B. Direct Runtime Timeline Sync Hook
+            // Listens directly to the hardware video clock to update slider elements on live sites
+            videoElement.ontimeupdate = () => {
+                const timelineEl = document.getElementById('timeline');
+                if (timelineEl && videoElement.duration) {
+                    const percentageProgress = videoElement.currentTime / videoElement.duration;
+                    
+                    // Emits a framework configuration link event so your timeline component redraws natively
+                    timelineEl.emit('timeline-update', { 
+                        progress: percentageProgress, 
+                        currentTime: videoElement.currentTime, 
+                        duration: videoElement.duration 
+                    }, false);
+                }
+            };
+        };
+
+        // 3. Prevent event stacking leak loops
         if (nativeFileInput.dataset.wired === 'true') return;
         nativeFileInput.dataset.wired = 'true';
 
-        // 3. Process video logs whenever changes are registered inside your hard drive prompt window
+        // 4. Process video logs whenever changes are registered inside your hard drive prompt window
         nativeFileInput.addEventListener('change', (event) => {
             const targetFiles = event.target.files;
             if (targetFiles && targetFiles.length > 0) {
@@ -32,12 +57,11 @@ AFRAME.registerComponent('btn-open-file', {
                 window.nativePlaylistMemory = Array.from(targetFiles).sort((a, b) => 
                     a.name.toLowerCase().localeCompare(b.name.toLowerCase())
                 );
-                console.log(`Playlist safely cached: ${window.nativePlaylistMemory.length} files loaded.`);
+                console.log(`Smart Playlist Synced Natively: ${window.nativePlaylistMemory.length} tracks cached.`);
 
                 // Release DOM focus parameters immediately so the browser drops text field tracking holds
                 nativeFileInput.blur();
 
-                // Build initial stream paths pointing onto item index position 0
                 const targetFirstVideo = targetFiles[0];
                 const initialBlobUrl = URL.createObjectURL(targetFirstVideo);
 
@@ -51,9 +75,7 @@ AFRAME.registerComponent('btn-open-file', {
 
                 videoElement.onloadedmetadata = () => {
                     videoElement.play().then(() => {
-                        // Dynamically update the dynamic 3D Floating layout headers text string
-                        const textDisplay = document.getElementById('vrVideoTitle');
-                        if (textDisplay) textDisplay.setAttribute('value', targetFirstVideo.name);
+                        this.syncPlayerInterfaceElements(targetFirstVideo.name);
 
                         // Invalidate WebGL projection material textures cache buffers to display fresh frame pixels
                         if (environmentManager) {
@@ -68,6 +90,7 @@ AFRAME.registerComponent('btn-open-file', {
                         console.warn("Autoplay block caught. Bypassing tracks via muted safety layer:", err);
                         videoElement.muted = true;
                         videoElement.play();
+                        this.syncPlayerInterfaceElements(targetFirstVideo.name);
                     });
                 };
 
@@ -83,7 +106,7 @@ AFRAME.registerComponent('btn-open-file', {
             }
         });
 
-        // 4. Framework-Shielded Keyboard Shortcut Processing Routine
+        // 5. Framework-Shielded Keyboard Shortcut Processing Routine
         this.onKeyDown = (event) => {
             // Check if the Command/Meta modification key parameter is actively held down
             if (!event.metaKey) return;
@@ -122,8 +145,7 @@ AFRAME.registerComponent('btn-open-file', {
 
                 videoElement.onloadedmetadata = () => {
                     videoElement.play().then(() => {
-                        const textDisplay = document.getElementById('vrVideoTitle');
-                        if (textDisplay) textDisplay.setAttribute('value', targetFileObj.name);
+                        this.syncPlayerInterfaceElements(targetFileObj.name);
 
                         if (environmentManager) {
                             environmentManager.removeAttribute('material');
@@ -136,6 +158,7 @@ AFRAME.registerComponent('btn-open-file', {
                     }).catch(err => {
                         videoElement.muted = true;
                         videoElement.play();
+                        this.syncPlayerInterfaceElements(targetFileObj.name);
                     });
                 };
 
