@@ -5,19 +5,22 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="assets/vr.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://unpkg.com"></script>
+
   <script src="libs/aframe/aframe-v1.7.1.js"></script>
   <script src="main/main.js" type="module"></script>
   <title>aframe vr player</title>
 </head>
 
 <body>
-  <input type="file" id="fileInput" accept="video/*" multiple style="display: none;">
+  <!-- <input type="file" id="fileInput" style="display: none;"> -->
+  <input type="file" id="fileInput" accept="video/*" style="display: none;">
 
   <a-scene background="color: #1a1a1a">
 
-    
-    
-    
+    <a-entity id="events" events></a-entity>
+    <a-entity id="settings" settings></a-entity>
+    <a-entity id="video-state" video-state></a-entity>
 
     <a-assets>
       <img id="asset-vp-play" src="assets/play.png">
@@ -43,60 +46,86 @@
       <img id="asset-arrow" src="assets/arrow.png">
     </a-assets>
 
+    <!-- <a-entity environment="preset: starry"></a-entity> -->
+
+    <!-- <video id="video" src="assets/sample.mp4"></video> -->
+        <!-- Native video media destination node initialized blank -->
     <video id="video" crossorigin="anonymous" playsinline webkit-playsinline></video>
 
-    <!-- camera stuff restored -->
-    
-      
-        
-          
+    <!-- camera stuff -->
+    <a-entity id="cameraRig" adjust-camera position="0 0 0">
+      <!-- camera-wrapper rotates around camera-rig for recenter -->
+      <a-entity recenter clickable geometry="primitive: sphere; radius: 80; segmentsWidth: 8; segmentsHeight: 8"
+        material="opacity: 0; side: back">
+        <a-entity id="cameraWrapper">
+          <!-- camera rotation controlled by vrheadset/mousekeyboard -->
+          <a-entity id="camera" camera look-controls stereocam="eye:left">
 
-            <!-- cursor dot stuff restored -->
-            
+            <!-- cursor stuff -->
+            <a-entity id="cursor" controls cursor-util>
+            </a-entity>
 
             <!-- subtitles -->
             <a-text id="subtitles" position="0 -1.5 -5" width="5" align="center">
               <a-plane visible="false"></a-plane>
             </a-text>
 
-          
-        
-      
-    
+          </a-entity>
+        </a-entity>
+      </a-entity>
+    </a-entity>
 
-    <!-- video player background manager restored -->
-    
+    <!-- video player -->
+    <a-entity id="env" env-manager></a-entity>
+        <!-- video player ui -->
 
-    <!-- video player ui title header pointing securely to CDN font paths -->
-    <a-text id="vrVideoTitle" 
-            value="No File Loaded" 
-            font="https://aframe.io"
-            font-image="https://aframe.io"
-            position="0 7.5 -60" 
-            width="45" 
-            align="center" 
-            color="#FFF" 
-            wrap-count="50">
-    </a-text>
+      <!-- FIXED: Linked direct raw json font maps to clear local 404 asset drops on GitHub production servers -->
+      <a-text id="vrVideoTitle" 
+              value="No File Loaded" 
+              font="https://aframe.io"
+              font-image="https://aframe.io"
+              position="0 7.5 -60" 
+              width="45" 
+              align="center" 
+              color="#FFF" 
+              wrap-count="50">
+      </a-text>
 
-    <!-- video player ui tray container layout fully restored -->
-    
 
-      
+    <!-- video player ui -->
+    <a-entity id="controls" position="0 0 0" rotation="0 0 0">
 
-      
+      <a-entity id="timeline" geometry="primitive: plane; width: 60; height: 6" position="0 1.5 -60"
+        material="color: #333" video-controls timeline controls clickable>
+      </a-entity>
 
-      <a-image btn-open-file clickable button-highlight controls src="#asset-vp-open-file" position="-14 -5 -60" scale="5 5 1"></a-image>
-      <a-image btn-seek-back clickable button-highlight controls src="#asset-vp-seek-backward" position="-7 -5 -60" scale="5 5 1"></a-image>
-      <a-image btn-pause-play clickable button-highlight controls src="#asset-vp-play" position="0 -5 -60" scale="5 5 1"></a-image>
-      <a-image btn-seek-forw clickable button-highlight controls src="#asset-vp-seek-forward" position="7 -5 -60" scale="5 5 1"></a-image>
-      <a-image btn-hide-controls clickable button-highlight controls src="#asset-vp-hide-ui" position="14 -5 -60" scale="5 5 1"></a-image>
-      <a-image btn-settings clickable button-highlight controls src="#asset-settings" position="21 -5 -60" scale="5 5 1"></a-image>
+      <a-entity id="vol" btn-vol clickable button-highlight controls position="-25 -5 -60"></a-entity>
 
-      
-      
+      <a-image btn-open-file clickable button-highlight controls src="#asset-vp-open-file" position="-14 -5 -60"
+        scale="5 5 1"></a-image>
 
-    
+      <a-image btn-seek-back clickable button-highlight controls src="#asset-vp-seek-backward" position="-7 -5 -60"
+        scale="5 5 1"></a-image>
+
+      <a-image btn-pause-play clickable button-highlight controls src="#asset-vp-play" position="0 -5 -60"
+        scale="5 5 1"></a-image>
+
+      <a-image btn-seek-forw clickable button-highlight controls src="#asset-vp-seek-forward" position="7 -5 -60"
+        scale="5 5 1"></a-image>
+      <a-image btn-hide-controls clickable button-highlight controls src="#asset-vp-hide-ui" position="14 -5 -60"
+        scale="5 5 1"></a-image>
+      <a-image btn-settings clickable button-highlight controls src="#asset-settings" position="21 -5 -60"
+        scale="5 5 1"></a-image>
+
+      <a-entity id="toggleAdjustUi" toggle-adjust-ui controls>
+      </a-entity>
+
+      <a-entity dialog-utils id="dialog" position="0 25 -50" rotation="15 0 0" visible="false">
+
+      </a-entity>
+
+    </a-entity>
+
 
   </a-scene>
 </body>
