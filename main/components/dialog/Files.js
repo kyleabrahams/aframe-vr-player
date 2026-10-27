@@ -173,6 +173,10 @@ AFRAME.registerComponent(C_FILES, {
                                 nativeVideoEl.pause();
                                 nativeVideoEl.src = src;
                                 nativeVideoEl.dataset.fileName = this.files[i];
+                                nativeVideoEl.dataset.currentSize = fileData.size.toString();
+
+                                // Update global position layout indexes so your keyboard shortcuts map flawlessly
+                                window.currentPlaylistPointerIndex = i;
                                 
                                 nativeVideoEl.onloadedmetadata = () => {
                                     nativeVideoEl.play().catch(err => {
@@ -180,19 +184,38 @@ AFRAME.registerComponent(C_FILES, {
                                         nativeVideoEl.play();
                                     });
 
-                                    // ADD THIS BLOCK: Forces the floating 3D text title to update on menu clicks
+                                    // GLOBAL PRODUCTION LOCKS: 
+                                    // Bypasses minified framework channels to push the metadata parameters instantly 
+                                    // onto your floating 3D text title containers and global timeline modules!
+                                    window.globalCurrentFileName = matchedFile.name;
+                                    
                                     const textDisplay = document.getElementById('vrVideoTitle');
                                     if (textDisplay) {
                                         textDisplay.setAttribute('value', matchedFile.name);
                                     }
+                                    
+                                    // Force direct hardware timeline synchronization updates
+                                    nativeVideoEl.ontimeupdate = () => {
+                                        const timelineEl = document.getElementById('timeline');
+                                        if (timelineEl && nativeVideoEl.duration) {
+                                            const progressRatio = nativeVideoEl.currentTime / nativeVideoEl.duration;
+                                            timelineEl.emit('timeline-update', {
+                                                progress: progressRatio,
+                                                currentTime: nativeVideoEl.currentTime,
+                                                duration: nativeVideoEl.duration
+                                            }, false);
+                                        }
+                                    };
                                 };
                             }
 
-                            // Pass configuration state token to your custom modules tracker
-                            El.videoState.setAttribute(C_VID_STATE, {
-                                src: src,
-                                fileName: this.files[i]
-                            })
+                            // Pass configuration state token to your custom modules tracker safely
+                            if (El.videoState && typeof El.videoState.setAttribute === 'function') {
+                                El.videoState.setAttribute(C_VID_STATE, {
+                                    src: src,
+                                    fileName: this.files[i]
+                                });
+                            }
 
                             // A-FRAME SPECIFIC TEXTURE RE-BINDING & THREE.JS BUFFER CLEAR:
                             const envEl = document.getElementById('env') || document.querySelector('a-videosphere') || document.querySelector('[material*="src: #video"]')
@@ -221,7 +244,9 @@ AFRAME.registerComponent(C_FILES, {
                     }
 
                     // Reset sub assets registry track index context reference
-                    El.subtitles.removeAttribute('subtitles')
+                    if (El.subtitles && typeof El.subtitles.removeAttribute === 'function') {
+                        El.subtitles.removeAttribute('subtitles');
+                    }
                 }
                 pos += space
             }
