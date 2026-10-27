@@ -2,9 +2,10 @@ import { El } from "../../elems.js";
 import { C_FILES } from "../dialog/Files.js";
 import { C_VID_STATE } from "../VideoState.js";
 
-// Dedicated global playlists mapping memory buffers
+// Clean global playlist data maps
 window.nativePlaylistMemory = [];
 window.currentPlaylistPointerIndex = 0;
+window.globalCurrentFileName = "No File Loaded";
 
 AFRAME.registerComponent('btn-open-file', {
     init: function () {
@@ -15,41 +16,27 @@ AFRAME.registerComponent('btn-open-file', {
 
         if (!nativeFileInput || !videoElement) return;
 
-        // 1. Physically trigger file exploration dialogues when clicking the 3D VR Folder model asset
+        // 1. Physically open file manager layout when clicking the 3D menu button
         el.addEventListener('click', () => {
             nativeFileInput.click();
         });
 
-        // 2. Core Broadcast Engine: Updates text panels and timeline track bars directly
-        this.syncPlayerInterfaceElements = (fileName) => {
-            // A. Update Floating 3D Title Header Overlay Node
+        // 2. Global variable sync layer to keep titles and custom text elements updated
+        this.updateGlobalTrackState = (fileName) => {
+            window.globalCurrentFileName = fileName || "Streaming Video File";
+            
+            // Explicitly force the 3D title text component overlay to display the name
             const textDisplay = document.getElementById('vrVideoTitle');
             if (textDisplay) {
-                textDisplay.setAttribute('value', fileName || "Streaming Local File");
+                textDisplay.setAttribute('value', window.globalCurrentFileName);
             }
-
-            // B. Direct Runtime Timeline Sync Hook
-            // Listens directly to the hardware video clock to update slider elements on live sites
-            videoElement.ontimeupdate = () => {
-                const timelineEl = document.getElementById('timeline');
-                if (timelineEl && videoElement.duration) {
-                    const percentageProgress = videoElement.currentTime / videoElement.duration;
-                    
-                    // Emits a framework configuration link event so your timeline component redraws natively
-                    timelineEl.emit('timeline-update', { 
-                        progress: percentageProgress, 
-                        currentTime: videoElement.currentTime, 
-                        duration: videoElement.duration 
-                    }, false);
-                }
-            };
         };
 
-        // 3. Prevent event stacking leak loops
+        // 3. Prevent duplicate tracking stacking loops
         if (nativeFileInput.dataset.wired === 'true') return;
         nativeFileInput.dataset.wired = 'true';
 
-        // 4. Process video logs whenever changes are registered inside your hard drive prompt window
+        // 4. Handle files loaded through the file selector popup window
         nativeFileInput.addEventListener('change', (event) => {
             const targetFiles = event.target.files;
             if (targetFiles && targetFiles.length > 0) {
@@ -75,7 +62,7 @@ AFRAME.registerComponent('btn-open-file', {
 
                 videoElement.onloadedmetadata = () => {
                     videoElement.play().then(() => {
-                        this.syncPlayerInterfaceElements(targetFirstVideo.name);
+                        this.updateGlobalTrackState(targetFirstVideo.name);
 
                         // Invalidate WebGL projection material textures cache buffers to display fresh frame pixels
                         if (environmentManager) {
@@ -90,7 +77,7 @@ AFRAME.registerComponent('btn-open-file', {
                         console.warn("Autoplay block caught. Bypassing tracks via muted safety layer:", err);
                         videoElement.muted = true;
                         videoElement.play();
-                        this.syncPlayerInterfaceElements(targetFirstVideo.name);
+                        this.updateGlobalTrackState(targetFirstVideo.name);
                     });
                 };
 
@@ -145,7 +132,7 @@ AFRAME.registerComponent('btn-open-file', {
 
                 videoElement.onloadedmetadata = () => {
                     videoElement.play().then(() => {
-                        this.syncPlayerInterfaceElements(targetFileObj.name);
+                        this.updateGlobalTrackState(targetFileObj.name);
 
                         if (environmentManager) {
                             environmentManager.removeAttribute('material');
@@ -158,7 +145,7 @@ AFRAME.registerComponent('btn-open-file', {
                     }).catch(err => {
                         videoElement.muted = true;
                         videoElement.play();
-                        this.syncPlayerInterfaceElements(targetFileObj.name);
+                        this.updateGlobalTrackState(targetFileObj.name);
                     });
                 };
 
