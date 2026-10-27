@@ -13,9 +13,15 @@
 </head>
 
 <body>
-  <input type="file" id="fileInput" style="display: none;">
+  <!-- <input type="file" id="fileInput" style="display: none;"> -->
+  <input type="file" id="fileInput" accept="video/*" style="display: none;">
 
-  <a-scene background="color: grey">
+  <!-- <button id="folderPermButton" style="position: fixed; top: 15px; left: 15px; z-index: 999999; padding: 12px 24px; font-weight: bold; background: #008080; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+    Click to Sync Video Directory Folder
+  </button> -->
+
+
+  <a-scene background="color: #1a1a1a">
 
     <a-entity id="events" events></a-entity>
     <a-entity id="settings" settings></a-entity>
@@ -47,7 +53,10 @@
 
     <!-- <a-entity environment="preset: starry"></a-entity> -->
 
-    <video id="video" src="assets/sample.mp4"></video>
+    <!-- <video id="video" src="assets/sample.mp4"></video> -->
+        <!-- Native video media destination node initialized blank -->
+    <video id="video" crossorigin="anonymous" playsinline webkit-playsinline></video>
+
     <!-- camera stuff -->
     <a-entity id="cameraRig" adjust-camera position="0 0 0">
       <!-- camera-wrapper rotates around camera-rig for recenter -->
@@ -73,6 +82,13 @@
 
     <!-- video player -->
     <a-entity id="env" env-manager></a-entity>
+        <!-- video player ui -->
+
+    <a-text id="vrVideoTitle" value="No File Loaded" position="0 7.5 -60" width="45" align="center" color="#FFF" wrap-count="50"></a-text>
+
+      
+      
+
 
 
     <!-- video player ui -->
